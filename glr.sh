@@ -1,36 +1,36 @@
 #! /bin/bash
 
-target_dir=`dirname ${0}`
+target_dir=`cd $(dirname ${0}) && pwd`
+prog_dir="${target_dir}/module"
+log_dir="${target_dir}/log"
 
 dir_clear () {
-  # trash
-  find ${target_dir} -type d ! -path "." | xargs rm -rf
-  rm -f ${target_dir}/period
+  for i in `ls ${log_dir}`
+  do
+    rm -rf ${log_dir}/${i}
+  done
 }
 
 start () {
-  echo "== start time: `date` =="
-  echo "`date '+ %T'`" >> ${target_dir}/period
 
   dir_clear
 
-  # top.sh
-  cmd="bash ${target_dir}/top.sh &"
-  echo ${cmd}
+  echo "== start time: `date` =="
+  echo ""
+  echo "`date '+ %T'`" >> ${log_dir}/period
 
-  eval ${cmd}
+  # modules start
+  modules=`find ${prog_dir} -type f`
+  for prog in ${modules}
+  do
+    echo "== execute ${prog} =="
+    cmd="bash ${prog} &"
+    echo ${cmd}
 
-  # vmstat.sh
-  cmd="bash ${target_dir}/vmstat.sh &"
-  echo ${cmd}
+    echo $$
+    echo ""
+  done
 
-  eval ${cmd}
-
-  # jstack.sh
-  # cmd="bash ${target_dir}/jstack.sh &"
-  # echo ${cmd}
-
-  # eval ${cmd}
 }
 
 stop () {
@@ -48,7 +48,7 @@ stop () {
   done
 
   echo "== stop time: `date` =="
-  echo "`date '+ %T'`" >> ${target_dir}/period
+  echo "`date '+ %T'`" >> ${log_dir}/period
 }
 
 case "$1" in
