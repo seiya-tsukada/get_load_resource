@@ -27,7 +27,6 @@ start () {
     cmd="bash ${prog} &"
     echo ${cmd}
 
-    echo $$
     echo ""
   done
 
