@@ -5,10 +5,7 @@ prog_dir="${target_dir}/module"
 log_dir="${target_dir}/log"
 
 dir_clear () {
-  for i in `ls ${log_dir}`
-  do
-    rm -rf ${log_dir}/${i}
-  done
+  find ${log_dir} -maxdepth 1 ! -path ${log_dir} | xargs rm -rf
 }
 
 start () {
@@ -25,25 +22,42 @@ start () {
   do
     echo "== execute ${prog} =="
     cmd="bash ${prog} &"
-    echo ${cmd}
-
+    # echo ${cmd}
+    eval ${cmd}
     echo ""
+
   done
 
 }
 
 stop () {
-  top_pid=`ps aux | grep "bash ./to[p]" | awk '{print $2}'`
-  vmstat_pid=`ps aux | grep "bash ./vmsta[t]" | awk '{print $2}'`
-  vmstat_ppid=`ps --ppid ${vmstat_pid} | grep vmstat | awk '{print $1}'`
-  # jstack_pid=`ps aux | grep "bash ./jstac[k]" | awk '{print $2}'`
 
-  pids=(${top_pid} ${vmstat_pid} ${vmstat_ppid} ${jstack_pid})
+  pid_files=`find ${log_dir} -name "*.pid"`
 
-  for i in ${pids[@]}; do
-    cmd="kill ${i}"
+  for i in ${pid_files}
+  do
+
+    p_pid=`cat ${i}` 
+    c_pid=`ps ho pid --ppid=${p_pid}`
+
+    # delete parent
+    cmd="kill ${p_pid}"
     echo ${cmd}
     eval ${cmd}
+    
+    # delete child
+    for i in ${c_pid}
+    do
+
+      ans=`ps aux | grep ${i} | grep -v grep | awk '{print $2}'`
+
+      if [ ! -z ${ans} ]; then
+        cmd="kill ${ans}"
+        eval ${cmd}
+      fi
+
+    done
+
   done
 
   echo "== stop time: `date` =="
