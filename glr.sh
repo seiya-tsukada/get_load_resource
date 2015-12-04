@@ -46,6 +46,7 @@ stop () {
 
     # delete parent
     cmd="kill ${p_pid}"
+    echo "kill for parent process"
     echo ${cmd}
     eval ${cmd}
     
@@ -53,14 +54,20 @@ stop () {
     for i in ${c_pid}
     do
 
-      ans=`ps aux | grep ${i} | grep -v grep | awk '{print $2}'`
+      tmp_pid=`ps aux | grep ${i} | grep -v grep | awk '{print $2}'`
+      if [ -n "${tmp_pid}" ]; then
+        cmd="kill -0 ${tmp_pid} > /dev/null 2>&1"
 
-      if [ ! -z ${ans} ]; then
-        cmd="kill ${ans}"
         eval ${cmd}
-      fi
+        if [ $? = 0 ]; then
+          cmd="kill ${tmp_pid}"
+          eval ${cmd}
+        fi
 
+      fi
     done
+
+    echo ""
 
   done
 
