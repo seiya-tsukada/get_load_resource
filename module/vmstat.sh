@@ -5,11 +5,11 @@ target_dir=`cd ${current_dir}/../ && pwd`
 log_dir="${target_dir}/log/vmstat"
 pid_file="${target_dir}/log/vmstat.pid"
 
-echo $$ > ${pid_file}
-
 if [ ! -e ${log_dir} ]; then
-  mkdir ${log_dir}
+  mkdir -p ${log_dir}
 fi
+
+echo $$ > ${pid_file}
 
 while :
 do

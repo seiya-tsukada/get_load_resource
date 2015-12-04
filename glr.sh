@@ -5,12 +5,16 @@ prog_dir="${target_dir}/module"
 log_dir="${target_dir}/log"
 
 dir_clear () {
-  find ${log_dir} -maxdepth 1 ! -path ${log_dir} | xargs rm -rf
+  rm -rf ${log_dir}
 }
 
 start () {
 
   dir_clear
+
+  if [ ! -e ${log_dir} ]; then
+    mkdir -p ${log_dir}
+  fi
 
   echo "== start time: `date` =="
   echo ""
